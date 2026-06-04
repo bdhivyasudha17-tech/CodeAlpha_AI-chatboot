@@ -1,0 +1,12 @@
+{
+  "name": "cloud-secure-bus-pass",
+  "version": "1.0.0",
+  "description": "Secure Bus Pass Booking System with Cloud scaling simulation and cryptographic tamper prevention.",
+  "type": "module",
+  "scripts": {
+    "test": "node test.js",
+    "dev": "node dev-server.js"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

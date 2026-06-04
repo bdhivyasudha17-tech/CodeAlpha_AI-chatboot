@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud-Based Secure Bus Pass System</title>
+    <!-- CSS Styling -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- Premium Glass Header -->
+        <header class="app-header">
+            <div class="brand-section">
+                <div class="brand-logo">
+                    <!-- Icon representing cloud bus connection -->
+                    <svg viewBox="0 0 24 24">
+                        <path d="M18 11H6a6 6 0 0 0-6 6v3h2v-2a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v2h2v-3a6 6 0 0 0-6-6zm-6-2a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="brand-title">SkyRoute Cloud</h1>
+                    <span class="brand-tag">High-Availability Transit Ledger</span>
+                </div>
+            </div>
+            
+            <!-- Tab Navigation -->
+            <nav class="nav-tabs">
+                <button class="tab-btn active" data-tab="booking-tab">Book Bus Pass</button>
+                <button class="tab-btn" data-tab="wallet-tab">My Tickets Wallet</button>
+                <button class="tab-btn" data-tab="scanner-tab">Check-In Terminal</button>
+            </nav>
+
+            <div class="system-status-pill">
+                <div class="status-dot" id="system-status-dot"></div>
+                <span id="system-status-text">ASG: Active (2 Nodes)</span>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Split Grid -->
+        <main class="dashboard-grid">
+            
+            <!-- Left Side: Interactive Portal Tab views -->
+            <section class="portal-main-panel">
+                
+                <!-- Tab 1: Booking Wizard -->
+                <div id="booking-tab" class="tab-content active glass-panel">
+                    <div class="wizard-header">
+                        <h2>Purchase Bus Pass</h2>
+                        <div class="wizard-steps">
+                            <div class="step-indicator active" id="indicator-step-1">
+                                <span class="step-number">1</span> Route Details
+                            </div>
+                            <div class="step-indicator" id="indicator-step-2">
+                                <span class="step-number">2</span> Seat Selection
+                            </div>
+                            <div class="step-indicator" id="indicator-step-3">
+                                <span class="step-number">3</span> Pay & Sign
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 1: Select Route and Schedule -->
+                    <div class="wizard-step-pane" id="wizard-pane-1">
+                        <div class="form-row two-col">
+                            <div class="form-group">
+                                <label for="schedule-date">Select Date</label>
+                                <input type="date" id="schedule-date" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="ticket-class">Travel Class</label>
+                                <select id="ticket-class" class="form-control">
+                                    <option value="economy">Economy Standard</option>
+                                    <option value="luxury-ac">Premium AC Express (+50% Base)</option>
+                                    <option value="sleeper">Sleeper Coach AC (+80% Base)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="routes-container">
+                            <h3>Available Routes</h3>
+                            <div class="routes-grid" id="routes-selector-container">
+                                <!-- Dynamically populated routes -->
+                            </div>
+                        </div>
+                        
+                        <div class="wizard-footer-actions">
+                            <div></div>
+                            <button class="btn btn-primary" id="btn-next-step-1" disabled>Select Seat & Passenger &rarr;</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Passenger Details and Seating -->
+                    <div class="wizard-step-pane" id="wizard-pane-2" style="display: none;">
+                        <div class="form-row two-col">
+                            <div class="form-group">
+                                <label for="passenger-name">Passenger Full Name</label>
+                                <input type="text" id="passenger-name" class="form-control" placeholder="Enter full name">
+                            </div>
+                            <div class="form-group">
+                                <label for="passenger-email">Passenger Email Address</label>
+                                <input type="email" id="passenger-email" class="form-control" placeholder="Enter email address">
+                            </div>
+                        </div>
+
+                        <div class="form-row two-col" style="margin-top: 24px; align-items: start;">
+                            <div class="form-group">
+                                <label>Choose Seat Allocation</label>
+                                <div class="bus-layout-container">
+                                    <div class="bus-front-indicator">FRONT / DRIVER SIDE</div>
+                                    <div class="seats-grid" id="bus-seats-container">
+                                        <!-- Bus seats rendered here -->
+                                    </div>
+                                    <div class="seat-legend">
+                                        <div class="legend-item"><div class="legend-box available"></div>Available</div>
+                                        <div class="legend-item"><div class="legend-box selected"></div>Selected</div>
+                                        <div class="legend-item"><div class="legend-box occupied"></div>Occupied</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group" style="gap: 16px;">
+                                <label>Selection Summary</label>
+                                <div class="booking-summary-box">
+                                    <div class="summary-row">
+                                        <span>Base Route Fare:</span>
+                                        <span id="summary-base-fare">$0.00</span>
+                                    </div>
+                                    <div class="summary-row">
+                                        <span>Class Premium:</span>
+                                        <span id="summary-class-premium">x 1.0</span>
+                                    </div>
+                                    <div class="summary-row">
+                                        <span>Dynamic Surge Multiplier:</span>
+                                        <span id="summary-surge-multiplier">x 1.0</span>
+                                    </div>
+                                    <div class="summary-row total">
+                                        <span>Estimated Total:</span>
+                                        <span class="total-price" id="summary-total-fare">$0.00</span>
+                                    </div>
+                                </div>
+                                <div class="hacker-panel">
+                                    <div class="hacker-header">
+                                        <!-- Hacker icon -->
+                                        <svg fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                                        </svg>
+                                        Hacker Sim: Client Price Manipulator
+                                    </div>
+                                    <div class="hacker-toggle-row">
+                                        <span style="font-size: 12px; color: var(--text-secondary);">Alter checkout price to $1.00 (Simulates Client Code Tampering)</span>
+                                        <label class="switch">
+                                            <input type="checkbox" id="hacker-price-manipulate">
+                                            <span class="switch-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="wizard-footer-actions">
+                            <button class="btn btn-secondary" id="btn-back-step-2">&larr; Back</button>
+                            <button class="btn btn-primary" id="btn-next-step-2" disabled>Confirm Booking Details &rarr;</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Billing checkout & Digital Signature Generation -->
+                    <div class="wizard-step-pane" id="wizard-pane-3" style="display: none;">
+                        <div style="text-align: center; padding: 20px 0; display: flex; flex-direction: column; gap: 16px;">
+                            <h3 style="font-size: 20px;">Secure Cryptographic Finalization</h3>
+                            <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto;">
+                                The ticket ledger utilizes asymmetric verification keys. Confirming checkout submits details to the server validator and seals the pass database.
+                            </p>
+                            
+                            <div class="booking-summary-box" style="max-width: 400px; margin: 20px auto; text-align: left;">
+                                <div class="summary-row">
+                                    <span>Passenger Name:</span>
+                                    <strong id="final-passenger-name">---</strong>
+                                </div>
+                                <div class="summary-row">
+                                    <span>Selected Route:</span>
+                                    <strong id="final-route-name">---</strong>
+                                </div>
+                                <div class="summary-row">
+                                    <span>Assigned Seat:</span>
+                                    <strong id="final-seat-number">---</strong>
+                                </div>
+                                <div class="summary-row">
+                                    <span>Class Option:</span>
+                                    <strong id="final-class-option">---</strong>
+                                </div>
+                                <div class="summary-row total">
+                                    <span>Final Invoice Fare:</span>
+                                    <span class="total-price" id="final-fare-price">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="wizard-footer-actions">
+                            <button class="btn btn-secondary" id="btn-back-step-3">&larr; Back</button>
+                            <button class="btn btn-primary" id="btn-confirm-checkout">Generate Tamper-Proof Digital Pass</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Tab 2: Ticket Wallet -->
+                <div id="wallet-tab" class="tab-content glass-panel">
+                    <div class="wizard-header">
+                        <h2>My Digital Passes</h2>
+                        <p style="color: var(--text-secondary); font-size: 13px;">Passes stored in localized cloud cache. Verified against the secure ledger on checking in.</p>
+                    </div>
+
+                    <div id="wallet-tickets-container" class="tickets-list">
+                        <!-- Tickets render here -->
+                    </div>
+                </div>
+
+                <!-- Tab 3: Scanning Check-In Terminal -->
+                <div id="scanner-tab" class="tab-content glass-panel">
+                    <div class="wizard-header">
+                        <h2>Transit Access Gate Terminal</h2>
+                        <p style="color: var(--text-secondary); font-size: 13px;">Validates physical passes. Verifies SHA-256 HMAC signatures and checks for double-spending.</p>
+                    </div>
+
+                    <div class="scan-camera-container">
+                        <div class="scan-viewfinder">
+                            <div class="scan-laser" id="scanner-laser-bar" style="display:none;"></div>
+                            <!-- Barcode QR outline vector icon -->
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M3 7V5a2 2 0 012-2h2m10 0h2a2 2 0 012 2v2m0 10v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2" stroke-linecap="round"/>
+                                <path d="M7 9h2v2H7zm8 0h2v2h-2zm-8 6h2v2H7zm8 0h2v2h-2z" fill="currentColor"/>
+                            </svg>
+                        </div>
+
+                        <div class="form-group" style="width: 100%; max-width: 320px;">
+                            <label for="scanner-select-ticket">Select Ticket to Scan</label>
+                            <select id="scanner-select-ticket" class="form-control">
+                                <option value="">-- No passes in database --</option>
+                            </select>
+                        </div>
+
+                        <button class="btn btn-primary" id="btn-scan-trigger" disabled>Trigger Check-in QR Scan</button>
+
+                        <div class="scanner-feedback idle" id="scanner-status-feedback">
+                            Ready to scan. Please select a pass and trigger verification.
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Right Side: Cloud Scale Monitor & WAF Logs -->
+            <section class="side-panel">
+                
+                <!-- Traffic Controller -->
+                <div class="cloud-infra-card">
+                    <div class="infra-header">
+                        <h3 class="infra-title">
+                            <!-- Gauge/Controller icon -->
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke-linecap="round"/>
+                            </svg>
+                            Traffic Load Generator
+                        </h3>
+                    </div>
+
+                    <div class="preset-buttons">
+                        <button class="btn-preset" data-preset="low">Night (Low)</button>
+                        <button class="btn-preset active" data-preset="normal">Midday (Normal)</button>
+                        <button class="btn-preset" data-preset="rush-hour">Commuters (Spike)</button>
+                        <button class="btn-preset" data-preset="ddos">DDoS (Attack)</button>
+                        <button class="btn-preset" data-preset="failure">Chaos Monkey</button>
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">Simulated Traffic Rate</span>
+                            <span class="slider-value" id="label-rps-value">120 RPS</span>
+                        </div>
+                        <input type="range" min="10" max="4000" value="120" class="custom-slider" id="input-rps-slider">
+                    </div>
+                </div>
+
+                <!-- Live Auto Scaling Group Instance Visualizer -->
+                <div class="cloud-infra-card">
+                    <div class="infra-header">
+                        <h3 class="infra-title">
+                            <!-- Server cluster icon -->
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+                                <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+                                <line x1="6" y1="6" x2="6.01" y2="6"/>
+                                <line x1="6" y1="18" x2="6.01" y2="18"/>
+                            </svg>
+                            Auto Scaling Group Nodes
+                        </h3>
+                        <span style="font-size: 11px; color: var(--text-secondary);" id="node-count-label">2 Instances</span>
+                    </div>
+
+                    <!-- Server Nodes Cluster Grid -->
+                    <div class="server-cluster-grid" id="infra-cluster-container">
+                        <!-- Server instances boxes injected here -->
+                    </div>
+
+                    <!-- Load Balancer Connector flow animations -->
+                    <div class="load-balancer-anim">
+                        <div class="lb-core" title="Load Balancer Layer">LB</div>
+                        <span style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">Dynamic Routing Layer (Reverse Proxy)</span>
+                        <div class="flow-particles" id="lb-particles-container">
+                            <!-- Flowing particles -->
+                        </div>
+                    </div>
+
+                    <!-- Caching Layer Stats -->
+                    <div class="db-status-bar" style="margin-bottom: 10px;">
+                        <span>In-Memory Redis Cache</span>
+                        <span class="db-tag" id="redis-cache-hit">Hit Rate: 85%</span>
+                    </div>
+
+                    <!-- DB Cluster layout -->
+                    <div class="db-status-bar">
+                        <span>Main PostgreSQL DB:</span>
+                        <span class="db-tag" id="db-master-load">Load: 12%</span>
+                    </div>
+                    <div class="db-status-bar" style="border-top: none; border-radius: 0 0 6px 6px;">
+                        <span>Replica Read Node:</span>
+                        <span class="db-replica-delay" id="db-replica-delay">Sync Lag: 2ms</span>
+                    </div>
+                </div>
+
+                <!-- Cluster Load Metrics -->
+                <div class="cloud-infra-card">
+                    <div class="infra-header">
+                        <h3 class="infra-title">Cloud Scaling Metrics</h3>
+                    </div>
+                    
+                    <div class="metrics-row">
+                        <div class="metric-card">
+                            <span class="metric-label">Avg CPU Usage</span>
+                            <span class="metric-value" id="metrics-avg-cpu">0%</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-label">Avg Latency</span>
+                            <span class="metric-value" id="metrics-avg-latency">80ms</span>
+                        </div>
+                    </div>
+
+                    <div class="metrics-row">
+                        <div class="metric-card">
+                            <span class="metric-label">Dropped Req</span>
+                            <span class="metric-value" id="metrics-dropped-req" style="color: var(--danger);">0</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-label">Total Volume</span>
+                            <span class="metric-value" id="metrics-total-vol">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security WAF Audit Terminal Logs -->
+                <div class="cloud-infra-card" style="flex-grow: 1;">
+                    <div class="infra-header">
+                        <h3 class="infra-title" style="color: var(--danger-glow); text-shadow: 0 0 10px var(--danger-glow);">
+                            Security WAF & Ledger Audit
+                        </h3>
+                        <button class="btn-preset" id="btn-clear-logs" style="padding: 2px 8px; border-radius: 6px;">Clear</button>
+                    </div>
+
+                    <div class="log-container" id="terminal-logs-view">
+                        <!-- System logs scroll in here -->
+                    </div>
+                </div>
+
+            </section>
+
+        </main>
+        
+    </div>
+
+    <!-- Toast Notification Overlay Container -->
+    <div class="toast-container" id="toast-notification-layer"></div>
+
+    <!-- JS Modular Engine Scripts -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>
