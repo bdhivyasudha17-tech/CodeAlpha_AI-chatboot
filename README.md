@@ -3,7 +3,7 @@
 A high-fidelity, secure, and interactive cloud-hosted Single Page Application (SPA) showcasing secure digital pass management, cryptographic ticket signing, and elastic auto-scaling infrastructure.
 
 ## 🚀 Live Demo & Deployment
-* **Live Web App**:  https://bdhivyasudha17-tech.github.io/CodeAlpha_cloudbased-bus-pass-system/
+* **Live Web App**:  https://github.com/bdhivyasudha17-tech/CodeAlpha_AI-chatboot
 * **Local Run**: `http://localhost:3000`
 
 ---
