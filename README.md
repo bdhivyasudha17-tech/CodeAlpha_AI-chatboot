@@ -1,46 +1,81 @@
-# SkyRoute: Secure Cloud-Based Bus Pass System
 
-A high-fidelity, secure, and interactive cloud-hosted Single Page Application (SPA) showcasing secure digital pass management, cryptographic ticket signing, and elastic auto-scaling infrastructure.
+# 🩺 MedAI — Pastel-Themed AI Healthcare Chatbot
 
-## 🚀 Live Demo & Deployment
+MedAI is a premium, modern, and responsive AI-powered healthcare assistant chatbot built entirely in vanilla HTML, CSS, and JavaScript. It runs locally in the browser using a zero-dependency retrieval-based Natural Language Processing (NLP) engine.
+
+Designed with a calming **pastel color palette** (soft mint greens, lavenders, warm peaches, and soft blues), MedAI provides instant responses to common healthcare queries while maintaining safety with built-in emergency keyword detection.
+
+---
+
+## ✨ Features
+
+- **🎨 Premium Pastel Theme:** Gentle HSL-tailored colors, smooth fade-in animations, responsive 3-column layout (Sidebar navigation | Chat area | Health stats panel).
+- **🧠 Local AI NLP Engine:** Retrieval-based engine utilizing keyword/phrase token matching with weighted scoring to match user queries to trained medical intents.
+- **💬 Quick-Reply Chips:** Dynamically suggests interactive response options after each message to guide the conversation.
+- **🚨 Emergency Detection:** Instantly triggers an alert banner at the top of the screen with emergency hotlines (911, 988, Poison Control) if critical symptoms (like chest pain, breathing issues, or self-harm thoughts) are detected.
+- **📊 Health & Wellness Tracker:** Right-hand side panel showing simulated fitness goal progress (Water, Steps, Sleep) and rotating daily wellness tips.
+- **🧹 Session Control:** Keep track of message count in the sidebar with a quick one-click "Clear Conversation" button.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:** Vanilla HTML5, Vanilla CSS3 (Custom properties/variables, Flexbox, Grid), ES6+ JavaScript.
+- **Backend (Dev Server):** Node.js HTTP module (Zero dependencies).
+- **Fonts & Icons:** Google Fonts (Poppins & Inter), Boxicons.
+
+---
+
+## 📁 Project Structure
+
+```text
+📁 design-ai-commercial-chatbot/
+├── index.html          # Main chatbot UI and layout
+├── styles.css          # Pastel color variables, layout, styling, and animations
+├── app.js              # Chat interface orchestration & UI logic
+├── dev-server.js       # Node.js local web server
+├── package.json        # Project metadata & npm dev script
+└── modules/
+    └── chatbot.js      # NLP Engine & 24 Predefined Medical Intents
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+Make sure you have [Node.js](https://nodejs.org/) installed.
+
+### Installation & Run Steps
+1. Clone or download this repository to your local machine.
+2. Open your terminal in the project directory.
+3. Start the local development server:
+   ```bash
+   npm run dev
+   ```
+   *Alternatively, run: `node dev-server.js`*
+4.## 🚀 Live Demo & Deployment
 * **Live Web App**:  https://github.com/bdhivyasudha17-tech/CodeAlpha_AI-chatboot
 * **Local Run**: `http://localhost:3000`
+   ```
 
 ---
 
-## 🛠️ Key Architectural & Security Features
+## 💬 Try These Predefined Intents
 
-* **Cryptographic Theft Prevention**: Generates an asymmetric SHA-256 HMAC digital signature for each ticket based on user variables and a secure backend key. Prevents seat transfer and code forgery.
-* **Double-Spend Verification**: The scan gate terminal maintains a secure check-in ledger. Scanning a ticket QR code twice triggers a double-spend alarm, blocking entry.
-* **Price Tampering Protection**: Prevents client-side price hacks. If a user modifies the DOM to submit a lower ticket price, the backend validator intercepts the request and logs a WAF security exception.
-* **Cloud Elastic Auto-Scaling Simulator**: Demonstrates dynamic scale-out/scale-in triggers (based on CPU thresholds), load-balanced routing, Redis in-memory cache hits, and PostgreSQL database replication lag under simulated high traffic volumes.
+Here are some sample queries you can type to test the chatbot:
 
----
-
-## 💻 Tech Stack
-* **Frontend**: HTML5, Vanilla ES Modules, Vanilla CSS (Glassmorphism & animations)
-* **Backend Simulation & Dev Server**: Node.js (HTTP and FS libraries)
-* **Testing**: Native JavaScript assertions engine
+* **General Symptoms:** `I feel sick`, `Symptom checker`
+* **Fever & Cough:** `I have a fever`, `I have a cough and cold`
+* **Appointments & Doctors:** `How do I book an appointment?`, `Find a cardiologist`
+* **Medications:** `What medicine can I take for a headache?`, `I need a prescription refill`
+* **Mental Health:** `I feel anxious`, `I'm having a panic attack`
+* **Emergency (Triggers Warning Banner):** `I have chest pain`, `I can't breathe`
+* **Insurance & Admin:** `Do you accept my insurance?`, `What is a copay?`
 
 ---
 
-## ⚙️ How to Setup & Run Locally
+## ⚠️ Medical Disclaimer
 
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/YOUR-USERNAME/YOUR-REPO-NAME.git
-   cd YOUR-REPO-NAME
-   ```
-   
-2. **Start the Development Server**:
-   ```bash
-   node dev-server.js
-   ```
-   * Open your browser and navigate to: **`http://localhost:3000`**
-
-3. **Run the Security Unit Tests**:
-   ```bash
-   node test.js
-   ```
-"# CodeAlpha_AI-chatboot" 
-"# CodeAlpha_AI-chatboot" 
+**MedAI is for informational and educational purposes only.** It does not provide professional medical advice, diagnosis, or treatment. Always consult with a qualified physician or healthcare provider for medical concerns. **In case of a medical emergency, call 911 immediately.**
+```
