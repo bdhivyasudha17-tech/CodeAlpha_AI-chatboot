@@ -64,7 +64,7 @@ export async function checkInPass(pass) {
     if (!isAuthentic) {
         return { 
             success: false, 
-            reason: "CRITICAL: Signature mismatch! Ticket data has been tampered with or forged." 
+            reason: "CRITICAL: Ledger signature mismatch! Transaction data has been tampered with or forged." 
         };
     }
 
@@ -72,7 +72,7 @@ export async function checkInPass(pass) {
     if (usedTicketsLedger.has(pass.signature)) {
         return { 
             success: false, 
-            reason: "SECURITY ALERT: Double spend detected! This ticket signature was already scanned." 
+            reason: "SECURITY ALERT: Double spend detected! This transaction signature was already verified." 
         };
     }
 
@@ -80,7 +80,7 @@ export async function checkInPass(pass) {
     usedTicketsLedger.add(pass.signature);
     return { 
         success: true, 
-        reason: "Valid signature. Access Granted." 
+        reason: "Valid signature. Core Ledger Authorized." 
     };
 }
 

@@ -58,7 +58,7 @@ export class CloudSimulator {
             this.tick();
         }, 1000);
         
-        this.log("System", "INFO: Cloud Infrastructure Simulation initialized and running.", "sys");
+        this.log("System", "INFO: ApexBank Core Infrastructure Ledger Simulation initialized.", "sys");
     }
 
     stop() {
@@ -91,20 +91,20 @@ export class CloudSimulator {
         switch (preset) {
             case "low":
                 this.targetRps = 30;
-                this.log("System", "Traffic preset updated: LOW (Night cycle).", "sys");
+                this.log("System", "Transaction load preset: LOW (After-hours liquidity).", "sys");
                 break;
             case "normal":
                 this.targetRps = 120;
-                this.log("System", "Traffic preset updated: NORMAL (Midday schedule).", "sys");
+                this.log("System", "Transaction load preset: NORMAL (Standard clearing cycle).", "sys");
                 break;
             case "rush-hour":
                 this.targetRps = 950;
-                this.log("System", "Traffic preset updated: RUSH HOUR SPIKE (Sudden booking surge!).", "sys");
+                this.log("System", "Transaction load preset: HIGH VOLUME (Direct deposit clearance spike!).", "sys");
                 break;
             case "ddos":
                 this.targetRps = 3500;
                 this.isDdosMode = true;
-                this.log("System", "WAF WARN: DDoS Botnet simulation triggered. High traffic incoming.", "sec");
+                this.log("System", "WAF WARN: Distributed Transaction Injection Botnet simulated. Fraud mitigation active.", "sec");
                 break;
             case "failure":
                 this.targetRps = 200;
@@ -120,7 +120,7 @@ export class CloudSimulator {
             const victim = healthyNodes[Math.floor(Math.random() * healthyNodes.length)];
             victim.status = "failed";
             victim.cpu = 100;
-            this.log("AutoScaler", `CRITICAL: Server instance ${victim.id} hardware crash. Health checks failed!`, "sc");
+            this.log("Ledger-Scaler", `CRITICAL: Ledger Node ${victim.id} memory saturation crash. Offline.`, "sc");
         }
     }
 
@@ -142,7 +142,7 @@ export class CloudSimulator {
                 };
                 this.instances.push(newInstance);
                 added++;
-                this.log("AutoScaler", `PROVISIONING: Spin up instance ${newInstance.id} (Terraform Trigger).`, "sc");
+                this.log("Ledger-Scaler", `PROVISIONING: Cluster scale-out, booting Ledger Node ${newInstance.id}.`, "sc");
             }
         }
         return added;
@@ -158,7 +158,7 @@ export class CloudSimulator {
             // Pick the newest instance to terminate
             const victim = eligible[eligible.length - 1];
             victim.status = "draining";
-            this.log("AutoScaler", `DRAINING: Stop routing traffic to ${victim.id}. Graceful shutdown initiated.`, "sc");
+            this.log("Ledger-Scaler", `DRAINING: Offloading connections from ${victim.id}. Graceful decommission active.`, "sc");
             return true;
         }
         return false;
@@ -175,7 +175,7 @@ export class CloudSimulator {
                 if (instance.provisionProgress >= 100) {
                     instance.status = "healthy";
                     instance.provisionProgress = 100;
-                    this.log("AutoScaler", `HEALTHY: Instance ${instance.id} added to Load Balancer target group.`, "sc");
+                    this.log("Ledger-Scaler", `HEALTHY: Node ${instance.id} synchronized to Core Banking cluster ledger.`, "sc");
                 }
             } else if (instance.status === "draining") {
                 instance.activeConns = Math.max(0, Math.floor(instance.activeConns * 0.3));
@@ -184,7 +184,7 @@ export class CloudSimulator {
                     const index = this.instances.indexOf(instance);
                     if (index > -1) {
                         this.instances.splice(index, 1);
-                        this.log("AutoScaler", `TERMINATED: Instance ${instance.id} decommissioned. Resource freed.`, "sc");
+                        this.log("Ledger-Scaler", `DECOMMISSIONED: Node ${instance.id} resources released.`, "sc");
                     }
                 }
             } else if (instance.status === "healthy") {
@@ -245,7 +245,7 @@ export class CloudSimulator {
                 baseLatency = 2400 + Math.random() * 800;
                 this.metrics.droppedRequests += Math.floor(filteredRequests * 0.1); // 10% connection timeout drop
                 if (Math.random() > 0.7) {
-                    this.log("LoadBalancer", `WARNING: Backend capacity saturated. Avg CPU ${averageCpu}%. HTTP 504 Gateway Timeouts occurring.`, "sec");
+                    this.log("LoadBalancer", `WARNING: Banking ledger throughput saturated. Avg CPU ${averageCpu}%. Processing delay queue engaged.`, "sec");
                 }
             } else if (averageCpu > 70) {
                 baseLatency = 350 + (averageCpu - 70) * 40;
@@ -261,7 +261,7 @@ export class CloudSimulator {
                 if (spinningUp === 0) {
                     const scaled = this.scaleOut(1);
                     if (scaled > 0) {
-                        this.log("AutoScaler", `SCALE OUT: Average CPU is ${averageCpu}%. Provisioning 1 node.`, "sc");
+                        this.log("Ledger-Scaler", `SCALE OUT: Average Node CPU ${averageCpu}% exceeds threshold. Launching 1 node.`, "sc");
                     }
                 }
             } else if (averageCpu < this.config.targetCpuScaleIn && this.instances.length > this.config.minInstances) {
@@ -269,7 +269,7 @@ export class CloudSimulator {
                 if (draining === 0) {
                     const scaled = this.scaleIn();
                     if (scaled) {
-                        this.log("AutoScaler", `SCALE IN: Average CPU is ${averageCpu}%. Gracefully scaling down 1 node.`, "sc");
+                        this.log("Ledger-Scaler", `SCALE IN: Average Node CPU ${averageCpu}% is low. Terminating 1 idle node.`, "sc");
                     }
                 }
             }

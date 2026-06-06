@@ -1,18 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 
 :root {
-    /* Color Palette - Cyber / Slate Theme */
+    /* Color Palette - Cyber Neo-Banking Emerald/Cyan Theme */
     --bg-main: hsl(222, 47%, 9%);
     --bg-surface: hsla(223, 47%, 14%, 0.7);
     --bg-surface-solid: hsl(223, 47%, 14%);
     --bg-card: hsla(223, 47%, 18%, 0.55);
     
-    --primary: hsl(245, 80%, 65%);
-    --primary-glow: hsla(245, 80%, 65%, 0.35);
-    --primary-dark: hsl(245, 80%, 55%);
+    --primary: hsl(150, 80%, 40%);
+    --primary-glow: hsla(150, 80%, 40%, 0.35);
+    --primary-dark: hsl(150, 80%, 32%);
     
-    --success: hsl(142, 70%, 45%);
-    --success-glow: hsla(142, 70%, 45%, 0.25);
+    --success: hsl(180, 85%, 45%);
+    --success-glow: hsla(180, 85%, 45%, 0.25);
     
     --warning: hsl(38, 92%, 50%);
     --warning-glow: hsla(38, 92%, 50%, 0.25);
@@ -25,8 +25,8 @@
     --text-muted: hsl(215, 16%, 45%);
     
     --border-color: hsla(217, 30%, 30%, 0.3);
-    --border-hover: hsla(245, 80%, 65%, 0.3);
-    --border-focus: hsl(245, 80%, 65%);
+    --border-hover: hsla(150, 80%, 40%, 0.3);
+    --border-focus: hsl(150, 80%, 40%);
     
     /* Timing & Curves */
     --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
