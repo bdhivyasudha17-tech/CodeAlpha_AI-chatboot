@@ -5,6 +5,7 @@
 
 import { verifyFareIntegrity, generatePassSignature, verifyPassSignature, checkInPass, resetLedger } from './modules/security.js';
 import { computeTicketPrice } from './modules/booking.js';
+import { initDatabase, executeQuery, encryptAES256, decryptAES256 } from './modules/sqlEngine.js';
 
 let passedTestsCount = 0;
 let totalTestsCount = 0;
@@ -94,6 +95,45 @@ async function runTests() {
     // Scan tampered ticket should be blocked
     const scanTampered = await checkInPass(tamperedPass);
     assert(scanTampered.success === false, "Tampered ticket signature validation should fail at check-in");
+
+    // Test Suite 5: SQL Injection and Data Leak Shield
+    console.log("\n[Test Suite 5: SQL Injection and Data Leak Shield]");
+    await initDatabase();
+
+    // 1. AES-256 Storage encryption validation
+    const secret = "TopSecretSSN123";
+    const encrypted = await encryptAES256(secret);
+    assert(encrypted.length > 0 && encrypted !== secret, "AES-256 encryption should produce a ciphertext distinct from the plaintext");
+    const decrypted = await decryptAES256(encrypted);
+    assert(decrypted === secret, "AES-256 decryption should restore the original plaintext value");
+
+    // 2. Vulnerable SQL Dynamic Concatenation Data Leak
+    const vulnResponse = await executeQuery("' OR '1'='1", { wafEnabled: false, preparedStatementsEnabled: false }, "");
+    assert(vulnResponse.success === true, "Unprotected query execution should return success");
+    assert(vulnResponse.results.length > 1, "SQL Injection payload on vulnerable settings should leak multiple database rows");
+    assert(vulnResponse.isDataLeak === true, "SQL Injection payload on vulnerable settings should trigger data leak alert flag");
+
+    // 3. Layer 1 WAF Signature Interception
+    const wafResponse = await executeQuery("' UNION SELECT 1 --", { wafEnabled: true, preparedStatementsEnabled: false }, "");
+    assert(wafResponse.success === false, "Malicious SQL Injection payload should be blocked by WAF");
+    assert(wafResponse.queryExecuted === "BLOCK_EXCEPTION", "Malicious SQL block exception should prevent parsing execution");
+
+    // 4. Layer 2 Prepared Statements Safety
+    const prepResponse = await executeQuery("' OR '1'='1", { wafEnabled: false, preparedStatementsEnabled: true }, "");
+    assert(prepResponse.success === true, "Prepared query execution should succeed");
+    assert(prepResponse.results.length === 0, "Prepared statements parameter binding should result in 0 rows matched (no leak)");
+    assert(prepResponse.isDataLeak === false, "Prepared statements should prevent data leak");
+
+    // 5. Capability Code Auth Scope Enforcement
+    // Public scope should redact balance, password, ssn
+    const publicQuery = await executeQuery("alice", { wafEnabled: false, preparedStatementsEnabled: true }, "");
+    assert(publicQuery.results.length === 1, "Searching valid user should return 1 row");
+    assert(publicQuery.results[0].encrypted_password.startsWith("●●●"), "Public scope should redact sensitive password column");
+    assert(publicQuery.results[0].encrypted_ssn.startsWith("●●●"), "Public scope should redact sensitive SSN column");
+
+    // Admin scope should NOT redact
+    const adminQuery = await executeQuery("alice", { wafEnabled: false, preparedStatementsEnabled: true }, "CAP-ADMIN-FULL");
+    assert(adminQuery.results[0].encrypted_password !== "●●● [Unauthorized] ●●●", "Admin scope should NOT redact sensitive password column");
 
     console.log(`\n=== TEST SUMMARY: Passed ${passedTestsCount} / ${totalTestsCount} assertions ===`);
     if (passedTestsCount === totalTestsCount) {

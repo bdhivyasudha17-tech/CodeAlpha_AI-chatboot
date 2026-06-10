@@ -9,6 +9,7 @@ import { CloudSimulator } from './modules/simulator.js';
 import { verifyFareIntegrity, checkInPass, resetLedger } from './modules/security.js';
 import { ROUTES, generateBusSeats, computeTicketPrice, createBusPass } from './modules/booking.js';
 import { ApexChatbot } from './modules/chatbot.js';
+import { initDatabase, executeQuery, decryptAES256, databaseState } from './modules/sqlEngine.js';
 
 // Application State
 let activeTab = 'booking-tab';
@@ -172,6 +173,9 @@ function initApp() {
 
     // 10. Initialize Apex AI Chatbot
     initChatbot();
+
+    // 11. Initialize Task 2: SQL Injection Shield Simulator
+    initSqlShieldTab();
 }
 
 /**
@@ -221,6 +225,32 @@ function exposeApexBankControls() {
             resetLedger();
             showToast("Core ledger transaction cache cleared. Ready for fresh verification.", "success");
             appendTerminalLog("Ledger-DB", "ADMIN: Transaction verification ledger reset. Double-spend cache flushed.", "acc");
+        },
+
+        // Task 2 hooks
+        setSqlPolicy: (policy, active) => {
+            const el = document.getElementById(policy === 'waf' ? 'sql-policy-waf' : 'sql-policy-prepare');
+            if (el) {
+                el.checked = active;
+                appendSqlLog("CLIENT", `System policy modified via API: ${policy.toUpperCase()} = ${active ? 'ACTIVE' : 'INACTIVE'}`);
+            }
+        },
+
+        loadSqlPreset: (preset) => {
+            const select = document.getElementById('sql-payload-preset');
+            if (select) {
+                select.value = preset;
+                const evt = new Event('change');
+                select.dispatchEvent(evt);
+            }
+        },
+
+        runSqlSandbox: async (searchVal) => {
+            const input = document.getElementById('sql-search-input');
+            if (input) {
+                input.value = searchVal;
+                await handleSqlSandboxQuery();
+            }
         }
     };
 }
@@ -797,3 +827,203 @@ function showToast(message, type = 'success') {
         setTimeout(() => { toast.remove(); }, 300);
     }, 4000);
 }
+
+/**
+ * Task 2: SQL Injection Shield Simulator Dashboard Initializer
+ */
+async function initSqlShieldTab() {
+    // 1. Initialize data entries encrypted using real AES-256
+    await initDatabase();
+    
+    // 2. Render database table visualization
+    await renderSqlDatabaseTable();
+
+    // 3. Set up Action Listeners
+    document.getElementById('btn-sql-execute').addEventListener('click', () => {
+        handleSqlSandboxQuery();
+    });
+
+    document.getElementById('sql-payload-preset').addEventListener('change', (e) => {
+        const input = document.getElementById('sql-search-input');
+        const select = e.target;
+        if (select.value === 'bypass_auth') {
+            input.value = "' OR '1'='1";
+            appendSqlLog("SANDBOX", "Loaded SQL payload: Tautology authentication bypass.");
+        } else if (select.value === 'union_harvest') {
+            input.value = "' UNION SELECT 1, username, encrypted_ssn, encrypted_password, 5, 6 FROM users --";
+            appendSqlLog("SANDBOX", "Loaded SQL payload: UNION schema harvesting attack.");
+        } else if (select.value === 'comment_truncate') {
+            input.value = "admin_helen' --";
+            appendSqlLog("SANDBOX", "Loaded SQL payload: Truncate search query comment.");
+        } else {
+            input.value = "";
+        }
+    });
+
+    document.getElementById('sql-db-decrypt-toggle').addEventListener('change', () => {
+        renderSqlDatabaseTable();
+    });
+
+    document.getElementById('btn-clear-sql-logs').addEventListener('click', () => {
+        document.getElementById('sql-logs-view').innerHTML = '';
+        appendSqlLog("CONSOLE", "Security monitor logs cleared.");
+    });
+
+    // Populate initial logs
+    appendSqlLog("DATABASE", "Cloud Database users_ledger initialized. Credentials encrypted under AES-256.", "acc");
+    appendSqlLog("FIREWALL", "Layer 1 Web Application Firewall (WAF) rule sets loaded.", "sys");
+    appendSqlLog("SEC-ENGINE", "Layer 2 Parameterized query compiler validated.", "sys");
+}
+
+/**
+ * Redraw database table with encrypted or decrypted content
+ */
+async function renderSqlDatabaseTable() {
+    const decryptEnabled = document.getElementById('sql-db-decrypt-toggle').checked;
+    const body = document.getElementById('sql-db-table-body');
+    body.innerHTML = '';
+
+    for (const user of databaseState.users) {
+        const tr = document.createElement('tr');
+        
+        let displayPassword = user.encrypted_password;
+        let displaySsn = user.encrypted_ssn;
+        let displayBalance = user.encrypted_balance;
+
+        if (decryptEnabled) {
+            // Decrypt columns at runtime demonstrating AES-256 decryption process
+            displayPassword = await decryptAES256(user.encrypted_password);
+            displaySsn = await decryptAES256(user.encrypted_ssn);
+            displayBalance = '$' + (await decryptAES256(user.encrypted_balance));
+        }
+
+        tr.innerHTML = `
+            <td><strong>${user.id}</strong></td>
+            <td><code>${user.username}</code></td>
+            <td title="${user.encrypted_password}">${displayPassword}</td>
+            <td title="${user.encrypted_ssn}">${displaySsn}</td>
+            <td title="${user.encrypted_balance}">${displayBalance}</td>
+            <td><span class="brand-tag" style="background: hsla(245, 80%, 65%, 0.15); color: hsl(245, 100%, 75%);">${user.capability_scope}</span></td>
+        `;
+        body.appendChild(tr);
+    }
+}
+
+/**
+ * Handle query submission, run WAF, Prepared statements, and capability scopes checks
+ */
+async function handleSqlSandboxQuery() {
+    const searchVal = document.getElementById('sql-search-input').value;
+    const wafEnabled = document.getElementById('sql-policy-waf').checked;
+    const preparedEnabled = document.getElementById('sql-policy-prepare').checked;
+    const capCode = document.getElementById('sql-cap-input').value;
+    const decryptEnabled = document.getElementById('sql-db-decrypt-toggle').checked;
+
+    const executeBtn = document.getElementById('btn-sql-execute');
+    executeBtn.disabled = true;
+
+    appendSqlLog("GATEWAY", `Incoming request: Search query="${searchVal}", CapToken="${capCode || 'None'}"`, "sys");
+
+    // Execute through SQL engine
+    const response = await executeQuery(searchVal, { wafEnabled, preparedStatementsEnabled: preparedEnabled }, capCode);
+
+    // Write steps to security console logs
+    for (const log of response.logs) {
+        let category = "sys";
+        if (log.step.includes("BLOCKED") || log.step.includes("LEAK") || log.step.includes("INJECTION")) {
+            category = "sec";
+        } else if (log.step.includes("GRANTED") || log.step.includes("VERIFY") || log.step.includes("STATUS_OK")) {
+            category = "acc";
+        }
+        appendSqlLog(log.step, log.detail, category);
+    }
+
+    const outputBody = document.getElementById('sql-output-table-body');
+    outputBody.innerHTML = '';
+
+    if (!response.success) {
+        showToast("SECURITY BLOCK: Malicious SQL patterns intercepted by WAF.", "error");
+        outputBody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; color: var(--danger); font-weight: 700; padding: 20px;">
+                    ⚠️ EXCEPTION: Request blocked by WAF (SQL Injection signature match).
+                </td>
+            </tr>
+        `;
+        executeBtn.disabled = false;
+        return;
+    }
+
+    if (response.results.length === 0) {
+        outputBody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 20px;">No rows matched user criteria.</td>
+            </tr>
+        `;
+    } else {
+        // Output rows returned to the UI
+        for (const row of response.results) {
+            const tr = document.createElement('tr');
+            
+            let displayPassword = row.encrypted_password;
+            let displaySsn = row.encrypted_ssn;
+            let displayBalance = row.encrypted_balance;
+
+            // Decrypt output if decryption switch is enabled AND column value is not redacted by scope checks
+            if (decryptEnabled && !row.encrypted_password.startsWith("●●●")) {
+                displayPassword = await decryptAES256(row.encrypted_password);
+            }
+            if (decryptEnabled && !row.encrypted_ssn.startsWith("●●●")) {
+                displaySsn = await decryptAES256(row.encrypted_ssn);
+            }
+            if (decryptEnabled && !row.encrypted_balance.startsWith("●●●")) {
+                displayBalance = '$' + (await decryptAES256(row.encrypted_balance));
+            }
+
+            tr.innerHTML = `
+                <td><strong>${row.id}</strong></td>
+                <td><code>${row.username}</code></td>
+                <td>${displayPassword}</td>
+                <td>${displaySsn}</td>
+                <td>${displayBalance}</td>
+                <td><span class="brand-tag">${row.capability_scope}</span></td>
+            `;
+            outputBody.appendChild(tr);
+        }
+
+        if (response.isDataLeak) {
+            showToast("SECURITY ALARM: Unauthorized database rows leaked to client!", "error");
+        } else {
+            showToast("Query completed successfully.", "success");
+        }
+    }
+
+    executeBtn.disabled = false;
+}
+
+/**
+ * Logger helper for SQL Shield console feed
+ */
+function appendSqlLog(service, message, category = "sys") {
+    const view = document.getElementById('sql-logs-view');
+    if (!view) return;
+
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+
+    const time = new Date().toLocaleTimeString();
+    
+    let badge = 'SYS';
+    if (category === 'sec') badge = 'SEC';
+    else if (category === 'acc') badge = 'AUTH';
+
+    entry.innerHTML = `
+        <span class="log-timestamp">[${time}]</span>
+        <span class="log-type ${category}">${badge}</span>
+        <span class="log-message"><strong>[${service}]</strong> ${message}</span>
+    `;
+
+    view.appendChild(entry);
+    view.scrollTop = view.scrollHeight;
+}
+

@@ -148,6 +148,46 @@ export class ApexChatbot {
                           "When the overall node CPU average exceeds <span class='chat-code'>70%</span>, our system scale-out policy provisions new instances. When load cools below <span class='chat-code'>30%</span>, instances are gracefully decommissioned (drained and terminated) to minimize cloud scaling overheads.",
                 actions: {},
                 suggestions: ["Simulate a spike", "Simulate a crash"]
+            },
+            {
+                name: "explain_sqli",
+                patterns: [/\b(sql injection|sqli|inject sql|leak data|data leak|sql attack)\b/i],
+                response: "SQL Injection (SQLi) occurs when user inputs are directly concatenated into SQL queries without validation. This allows an attacker to manipulate the SQL statement structure. \n\n" +
+                          "For example, injecting <span class='chat-code'>' OR '1'='1</span> forces the query conditional to always evaluate to true, bypassing login checks or dumping all user rows. Try it in the <span class='chat-highlight'>SQL Leak Shield</span> tab!",
+                actions: { tab: "sql-shield-tab" },
+                suggestions: ["How to stop SQLi?", "Explain AES-256 database", "Explain capability codes"]
+            },
+            {
+                name: "explain_waf_prepare",
+                patterns: [/\b(prevent sqli|prepared statements|waf|double-layer|prepared query|parameterized)\b/i],
+                response: "We secure database queries using a **Double-Layer Security Protocol**:\n\n" +
+                          "1. <span class='chat-highlight'>Layer 1: Web Application Firewall (WAF)</span>: Scans input text for patterns like UNION, comment markers, or tautologies, blocking attacks at the perimeter.\n" +
+                          "2. <span class='chat-highlight'>Layer 2: Parameterized Queries (Prepared Statements)</span>: Pre-compiles the query template so input parameters are treated strictly as data literals. Even if a user injects SQL code, it won't alter the syntax structure.",
+                actions: { tab: "sql-shield-tab" },
+                suggestions: ["Explain capability codes", "Explain AES-256 database", "Trigger SQL Injection"]
+            },
+            {
+                name: "explain_aes256",
+                patterns: [/\b(aes-256|aes|encryption|encrypted password|secure storage|column encryption)\b/i],
+                response: "To secure credentials against data leaks, we implement **AES-256 column-level encryption** for sensitive fields (passwords, SSNs, balances) in the database. \n\n" +
+                          "Even if an attacker successfully injects SQL and leaks rows, they only obtain encrypted ciphertext hex blocks. The data remains completely safe unless decrypted using the secure master key.",
+                actions: { tab: "sql-shield-tab" },
+                suggestions: ["Explain capability codes", "How to stop SQLi?", "Explain SQL Injection"]
+            },
+            {
+                name: "explain_capability",
+                patterns: [/\b(capability|capability code|token scope|access control|token)\b/i],
+                response: "A **Capability Code** acts as a cryptographically verifiable token representing access scopes. Before executing a query, the database server verifies the code's scope (e.g. `CAP-READ-BALANCE` or `CAP-ADMIN-FULL`). \n\n" +
+                          "If the code lacks scope, the server redacts sensitive columns before returning them to the client, forming an API-level access gate that prevents data leaks.",
+                actions: { tab: "sql-shield-tab" },
+                suggestions: ["Explain AES-256 database", "Trigger SQL Injection", "How to stop SQLi?"]
+            },
+            {
+                name: "run_sqli_sim",
+                patterns: [/\b(simulate injection|run sql injection|trigger sqli|attack database|inject payload)\b/i],
+                response: "Warning! Switching to <span class='chat-highlight'>SQL Leak Shield</span>, disabling firewall protections, loading the Tautology auth bypass payload, and executing query. Observe how the database leaks all rows to the screen!",
+                actions: { tab: "sql-shield-tab", runSqli: true },
+                suggestions: ["How to stop SQLi?", "Explain AES-256 database", "Explain capability codes"]
             }
         ];
 
@@ -307,6 +347,28 @@ export class ApexChatbot {
 
         if (actions.resetLedger) {
             controls.resetLedger();
+        }
+
+        if (actions.runSqli) {
+            setTimeout(() => {
+                // Disable protections
+                const waf = document.getElementById('sql-policy-waf');
+                const prep = document.getElementById('sql-policy-prepare');
+                if (waf) waf.checked = false;
+                if (prep) prep.checked = false;
+                // Load preset payload
+                const select = document.getElementById('sql-payload-preset');
+                if (select) {
+                    select.value = 'bypass_auth';
+                    const evt = new Event('change');
+                    select.dispatchEvent(evt);
+                }
+                // Run query
+                setTimeout(() => {
+                    const btn = document.getElementById('btn-sql-execute');
+                    if (btn) btn.click();
+                }, 300);
+            }, 300);
         }
     }
 }

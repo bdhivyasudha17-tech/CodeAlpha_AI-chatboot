@@ -33,6 +33,7 @@
                 <button class="tab-btn active" data-tab="booking-tab">Investment Portal</button>
                 <button class="tab-btn" data-tab="wallet-tab">Asset Vault</button>
                 <button class="tab-btn" data-tab="scanner-tab">Transfer Authorization</button>
+                <button class="tab-btn" data-tab="sql-shield-tab">SQL Leak Shield</button>
             </nav>
 
             <div class="system-status-pill">
@@ -249,6 +250,142 @@
                             Ready to authorize. Please select a receipt and trigger verification.
                         </div>
                     </div>
+                </div>
+
+                <!-- Tab 4: SQL Injection Shield -->
+                <div id="sql-shield-tab" class="tab-content glass-panel">
+                    <div class="wizard-header">
+                        <h2>SQL Injection &amp; Data Leak Shield</h2>
+                        <p style="color: var(--text-secondary); font-size: 13px;">Double-layer security protection: Web Application Firewall (WAF) filtering and Parameterized Prepared Queries. Secures sensitive columns via AES-256 encryption.</p>
+                    </div>
+
+                    <div class="sql-dashboard-grid">
+                        
+                        <!-- Left Sub-panel: Database Table Visualizer -->
+                        <div class="sql-db-panel glass-panel" style="margin-bottom: 0px; padding: 20px;">
+                            <div class="panel-section-header">
+                                <h3>Cloud Database: <code>users_ledger</code></h3>
+                                <div class="toggle-control-group">
+                                    <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-right: 8px;">🔓 Decrypt AES-256</span>
+                                    <label class="switch">
+                                        <input type="checkbox" id="sql-db-decrypt-toggle">
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="table-container">
+                                <table class="sql-table" id="sql-db-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Username</th>
+                                            <th>Encrypted Password (AES-256)</th>
+                                            <th>Encrypted SSN (AES-256)</th>
+                                            <th>Encrypted Balance (AES-256)</th>
+                                            <th>Token Scope</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sql-db-table-body">
+                                        <!-- Dynamically generated rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Right Sub-panel: Query Execution & Attack Console -->
+                        <div class="sql-control-panel">
+                            
+                            <!-- Security Policy Configuration (Layer 1 & Layer 2) -->
+                            <div class="policy-card glass-panel" style="padding: 18px; margin-bottom: 16px;">
+                                <h4>Double-Layer Security Protocol</h4>
+                                <div class="policy-option" style="margin-top: 12px;">
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" id="sql-policy-waf" checked>
+                                        <span class="checkmark"></span>
+                                        <strong>Layer 1: Web Application Firewall (WAF)</strong>
+                                    </label>
+                                    <p class="policy-desc">Inspects incoming SQL queries for comment lines, UNION commands, and tautology signatures (like 1=1).</p>
+                                </div>
+                                <div class="policy-option" style="margin-top: 12px;">
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" id="sql-policy-prepare" checked>
+                                        <span class="checkmark"></span>
+                                        <strong>Layer 2: Parameterized Prepared Statements</strong>
+                                    </label>
+                                    <p class="policy-desc">Compiles query templates and binds user parameters as literal data, preventing changes to the SQL parser logic.</p>
+                                </div>
+                            </div>
+
+                            <!-- User Input / Injection sandbox -->
+                            <div class="query-sandbox-card glass-panel" style="padding: 18px; margin-bottom: 16px;">
+                                <h4>Query Sandbox</h4>
+                                
+                                <div class="form-row two-col" style="margin-top: 12px; margin-bottom: 12px;">
+                                    <div class="form-group">
+                                        <label for="sql-search-input">Search Username</label>
+                                        <input type="text" id="sql-search-input" class="form-control" placeholder="e.g. alice">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="sql-cap-input">Capability Access Code</label>
+                                        <select id="sql-cap-input" class="form-control">
+                                            <option value="">None (Public Access)</option>
+                                            <option value="CAP-READ-BALANCE">CAP-READ-BALANCE (Scope: Balance Read)</option>
+                                            <option value="CAP-ADMIN-FULL">CAP-ADMIN-FULL (Scope: Full Database Admin)</option>
+                                            <option value="CAP-INVALID-TOKEN">CAP-INVALID-TOKEN (Scope: Invalid Auth)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="sandbox-actions" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                    <button class="btn btn-primary" id="btn-sql-execute" style="padding: 10px 18px;">Run Query</button>
+                                    <select id="sql-payload-preset" class="form-control" style="font-size: 12px; padding: 10px; flex-grow: 1; min-width: 200px;">
+                                        <option value="">-- Load Injection Attack --</option>
+                                        <option value="bypass_auth">Tautology: ' OR '1'='1</option>
+                                        <option value="union_harvest">Harvesting: ' UNION SELECT 1, username, encrypted_ssn, encrypted_password, 5, 6 FROM users --</option>
+                                        <option value="comment_truncate">Truncate: admin_helen' --</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Query Execution Output -->
+                            <div class="query-output-card glass-panel" style="padding: 18px;">
+                                <h4>Query Output Records</h4>
+                                <div class="table-container" style="max-height: 150px; min-height: 80px; background: hsl(223, 47%, 6%); border-radius: var(--radius-sm); border: 1px solid var(--border-color); margin-top: 10px;">
+                                    <table class="sql-table" id="sql-output-table">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Username</th>
+                                                <th>Password</th>
+                                                <th>SSN</th>
+                                                <th>Balance</th>
+                                                <th>Scope</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="sql-output-table-body">
+                                            <tr>
+                                                <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 20px;">No query executed yet. Run search.</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- SQL Security Terminal Logs -->
+                    <div class="sql-log-section">
+                        <div class="panel-section-header" style="margin-top: 16px; margin-bottom: 8px;">
+                            <h3 style="color: var(--danger); font-size: 14px; text-shadow: 0 0 5px var(--danger-glow);">SQL Engine &amp; Security Monitor Logs</h3>
+                            <button class="btn-preset" id="btn-clear-sql-logs" style="padding: 2px 8px;">Clear Logs</button>
+                        </div>
+                        <div class="log-container" id="sql-logs-view" style="height: 160px;">
+                            <!-- Query steps loaded dynamically -->
+                        </div>
+                    </div>
+
                 </div>
 
             </section>
