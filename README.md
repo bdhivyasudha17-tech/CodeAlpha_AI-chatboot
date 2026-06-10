@@ -79,3 +79,4 @@ Here are some sample queries you can type to test the chatbot:
 
 **MedAI is for informational and educational purposes only.** It does not provide professional medical advice, diagnosis, or treatment. Always consult with a qualified physician or healthcare provider for medical concerns. **In case of a medical emergency, call 911 immediately.**
 ```
+"# CodeAlpha_SQL-Injection-Shield-" 
