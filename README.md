@@ -55,7 +55,7 @@ Make sure you have [Node.js](https://nodejs.org/) installed.
    ```
    *Alternatively, run: `node dev-server.js`*
 4.## 🚀 Live Demo & Deployment
-* **Live Web App**:  https://github.com/bdhivyasudha17-tech/CodeAlpha_AI-chatboot
+* **Live Web App**:  https://bdhivyasudha17-tech.github.io/CodeAlpha_AI-chatboot/
 * **Local Run**: `http://localhost:3000`
    ```
 
